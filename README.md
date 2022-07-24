@@ -1,5 +1,7 @@
 # Tempen
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/72a1c04f-45e5-4c13-bd23-85ce7177fba3/deploy-status)](https://app.netlify.com/sites/tempen/deploys)
+
 > **[https://www.tempen.se](https://www.tempen.se)** - Temperature today compared to yesterday
 
 Using [SMHI Open Data API](https://opendata.smhi.se/apidocs/) as the weather data source.
