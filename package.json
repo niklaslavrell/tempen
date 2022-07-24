@@ -17,9 +17,7 @@
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
-    "tyypecheck": "tsc --noEmit",
-    "release": "yarn build && yarn deploy",
-    "deploy": "surge --project public --domain yesterday-weather.surge.sh"
+    "tyypecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.9.3",
@@ -40,7 +38,6 @@
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
     "prettier": "^2.7.1",
-    "surge": "^0.23.1",
     "typescript": "^4.7.4"
   }
 }
