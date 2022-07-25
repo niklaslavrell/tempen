@@ -53,14 +53,13 @@ const IndexPage: React.FC = () => {
     }
   };
 
-  const checkPermission = useCallback(() => {
+  const checkPermission = useCallback(async () => {
     if (!utils.hasPermissionsApi) return;
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((permissionStatus) => {
-        setLocationPermissionState(permissionStatus.state);
-        permissionStatus.onchange = onPermissionStatusChange;
-      });
+    const permissionStatus = await navigator.permissions.query({
+      name: "geolocation",
+    });
+    setLocationPermissionState(permissionStatus.state);
+    permissionStatus.onchange = onPermissionStatusChange;
   }, []);
 
   const fetchLocation = useCallback(() => {
