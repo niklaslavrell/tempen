@@ -54,7 +54,7 @@ const IndexPage: React.FC = () => {
   };
 
   const checkPermission = useCallback(() => {
-    if (!utils.canCheckPermission) return;
+    if (!utils.hasPermissionsApi) return;
     navigator.permissions
       .query({ name: "geolocation" })
       .then((permissionStatus) => {
@@ -106,13 +106,13 @@ const IndexPage: React.FC = () => {
   }, [checkPermission]);
 
   useEffect(() => {
-    if (utils.canCheckPermission && locationPermissionState === "granted") {
+    if (utils.hasPermissionsApi && locationPermissionState === "granted") {
       fetchLocation();
     }
   }, [locationPermissionState, fetchLocation]);
 
   useEffect(() => {
-    if (!utils.canCheckPermission && !location) {
+    if (!utils.hasPermissionsApi && !location) {
       const now = new Date().getTime();
       const then = Number(lastFetchedLocationAt);
       if (now - then <= utils.A_DAY_IN_MS) {

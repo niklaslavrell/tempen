@@ -1,5 +1,12 @@
-export const canCheckPermission =
-  typeof window !== "undefined" &&
+const hasWindow = typeof window !== "undefined";
+
+export const hasStorage =
+  hasWindow &&
+  window.localStorage !== undefined &&
+  window.sessionStorage !== undefined;
+
+export const hasPermissionsApi =
+  hasWindow &&
   navigator.permissions !== undefined &&
   navigator.permissions.query !== undefined;
 

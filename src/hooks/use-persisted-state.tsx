@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
+import * as utils from "../utils";
 
 export const usePersistedState = (
   key: string,
   storageType: "sessionStorage" | "localStorage" = "localStorage"
 ) => {
-  const storage =
-    typeof window !== "undefined" &&
-    window.localStorage &&
-    window.sessionStorage
-      ? storageType === "sessionStorage"
-        ? sessionStorage
-        : localStorage
-      : undefined;
+  const storage = utils.hasStorage
+    ? storageType === "sessionStorage"
+      ? sessionStorage
+      : localStorage
+    : undefined;
   const initialValue = storage?.getItem(key) || "";
   const [value, setValue] = useState(initialValue);
 
