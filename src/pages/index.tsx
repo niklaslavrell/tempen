@@ -6,7 +6,9 @@ import {
   AnimateY,
   BoldText,
   Button,
+  LightestText,
   LightText,
+  Link,
   RegularText,
   TemperatureText,
   TemperatureWrapper,
@@ -238,7 +240,7 @@ const IndexPage: React.FC = () => {
             <AnimateFade>
               <LightText
                 css={css`
-                  padding: 0 1rem;
+                  padding: 1rem;
                 `}
               >
                 {weatherStatus.data.difference > 0
@@ -249,6 +251,9 @@ const IndexPage: React.FC = () => {
                     } grader kallare idag än igår vid den här tiden`
                   : `Det är lika varmt idag som igår vid den här tiden`}
               </LightText>
+              <LightestText>
+                Källa: <Link href="https://www.smhi.se/data">SMHI</Link>
+              </LightestText>
             </AnimateFade>
           )}
         </GridItem>

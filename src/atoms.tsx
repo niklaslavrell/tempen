@@ -6,6 +6,10 @@ export const Paragraph = styled.p`
   text-align: center;
 `;
 
+export const LightestText = styled(Paragraph)`
+  font-weight: 100;
+`;
+
 export const LightText = styled(Paragraph)`
   font-weight: 300;
 `;
@@ -24,10 +28,13 @@ export const TemperatureWrapper = styled.div`
   align-items: center;
 `;
 
-export const TemperatureText = styled(Paragraph)<{ large?: boolean }>`
+export const TemperatureText = styled(LightestText)<{ large?: boolean }>`
   font-size: ${(props) => (props.large ? "10rem" : "2rem")};
-  font-weight: 100;
   margin: 0;
+`;
+
+export const Link = styled.a`
+  color: unset;
 `;
 
 export const Button = styled(motion.button)`
