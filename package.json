@@ -9,7 +9,7 @@
     "extends": "react-app"
   },
   "engines": {
-    "node": "16"
+    "node": "18"
   },
   "scripts": {
     "develop": "gatsby develop",
