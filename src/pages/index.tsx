@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { css } from "@emotion/react";
 import styled from "@emotion/styled";
+import { useQuery } from "@tanstack/react-query";
 import {
   AnimateFade,
   AnimateY,
@@ -44,7 +45,6 @@ const IndexPage: React.FC = () => {
   const [lastFetchedLocationAt, setLastFetchedLocationAt] = usePersistedState(
     "last-fetched-location-at"
   );
-  const [weatherStatus, setWeatherStatus] = useState<types.WeatherStatus>();
   const siteMetadata = useSiteMetadata();
 
   const onPermissionStatusChange = (event: Event) => {
@@ -82,21 +82,6 @@ const IndexPage: React.FC = () => {
     );
   }, [setLastFetchedLocationAt]);
 
-  const fetchWeatherData = async (
-    geolocationCoordinates: GeolocationCoordinates
-  ) => {
-    setWeatherStatus({ status: types.FetchState.loading });
-    const data = await smhi.fetchData(
-      geolocationCoordinates.latitude,
-      geolocationCoordinates.longitude
-    );
-    if (data) {
-      setWeatherStatus({ status: types.FetchState.succeeded, data });
-    } else {
-      setWeatherStatus({ status: types.FetchState.failed });
-    }
-  };
-
   useEffect(() => {
     checkPermission();
   }, [checkPermission]);
@@ -117,11 +102,25 @@ const IndexPage: React.FC = () => {
     }
   }, [location, lastFetchedLocationAt, fetchLocation]);
 
-  useEffect(() => {
-    if (location?.status === types.FetchState.succeeded) {
-      fetchWeatherData(location.geolocationCoordinates);
-    }
-  }, [location]);
+  const weatherQuery = useQuery(
+    [
+      "weather",
+      location?.status === types.FetchState.succeeded &&
+        location.geolocationCoordinates.latitude,
+      location?.status === types.FetchState.succeeded &&
+        location.geolocationCoordinates.longitude,
+    ],
+    async () => {
+      if (location?.status === types.FetchState.succeeded) {
+        const weatherData = await smhi.fetchData(
+          location.geolocationCoordinates.latitude,
+          location.geolocationCoordinates.longitude
+        );
+        return weatherData;
+      }
+    },
+    { enabled: location?.status === types.FetchState.succeeded }
+  );
 
   return (
     <Layout>
@@ -131,37 +130,37 @@ const IndexPage: React.FC = () => {
             <RegularText>{siteMetadata.description}</RegularText>
           </AnimateFade>
 
-          {weatherStatus?.status === types.FetchState.succeeded && (
+          {weatherQuery.data && (
             <AnimateFade>
               <RegularText>{`kl ${utils.getHoursTwoDigit(
-                weatherStatus.data.date
+                weatherQuery.data.date
               )}`}</RegularText>
             </AnimateFade>
           )}
         </GridItem>
 
         <GridItem>
-          {weatherStatus?.status === types.FetchState.succeeded ? (
+          {weatherQuery.data ? (
             <AnimateFade key="temp">
               <TemperatureWrapper>
-                {weatherStatus.data.difference > 0 ? (
+                {weatherQuery.data.difference > 0 ? (
                   <AnimateY direction="up">
                     <Arrows.Warmer />
                   </AnimateY>
-                ) : weatherStatus.data.difference < 0 ? (
+                ) : weatherQuery.data.difference < 0 ? (
                   <AnimateY direction="down">
                     <Arrows.Colder />
                   </AnimateY>
                 ) : null}
                 <TemperatureText large>
-                  {weatherStatus.data.difference >= 0
-                    ? weatherStatus.data.difference
-                    : weatherStatus.data.difference * -1}
+                  {weatherQuery.data.difference >= 0
+                    ? weatherQuery.data.difference
+                    : weatherQuery.data.difference * -1}
                 </TemperatureText>
                 <TemperatureText>°C</TemperatureText>
               </TemperatureWrapper>
             </AnimateFade>
-          ) : weatherStatus?.status === types.FetchState.loading ? (
+          ) : weatherQuery.isLoading ? (
             <AnimateFade key="wheather-load">
               <LightText>Hämtar väder</LightText>
             </AnimateFade>
@@ -184,14 +183,14 @@ const IndexPage: React.FC = () => {
         </GridItem>
 
         <GridItem>
-          {weatherStatus?.status === types.FetchState.succeeded ? (
+          {weatherQuery.data ? (
             <AnimateFade key="wheather-now">
               <LightText>Där du är just nu</LightText>
               <RegularText
                 css={css`
                   font-size: 1.5rem;
                 `}
-              >{`${weatherStatus.data?.today.celsius.toFixed(
+              >{`${weatherQuery.data.today.celsius.toFixed(
                 0
               )} °C`}</RegularText>
             </AnimateFade>
@@ -223,18 +222,18 @@ const IndexPage: React.FC = () => {
         </GridItem>
 
         <GridItem>
-          {weatherStatus?.status === types.FetchState.succeeded && (
+          {weatherQuery.data && (
             <AnimateFade>
               <LightText
                 css={css`
                   padding: 1rem;
                 `}
               >
-                {weatherStatus.data.difference > 0
-                  ? `Det är ${weatherStatus.data.difference} grader varmare idag än igår vid den här tiden`
-                  : weatherStatus.data.difference < 0
+                {weatherQuery.data.difference > 0
+                  ? `Det är ${weatherQuery.data.difference} grader varmare idag än igår vid den här tiden`
+                  : weatherQuery.data.difference < 0
                   ? `Det är ${
-                      weatherStatus.data.difference * -1
+                      weatherQuery.data.difference * -1
                     } grader kallare idag än igår vid den här tiden`
                   : `Det är lika varmt idag som igår vid den här tiden`}
               </LightText>
