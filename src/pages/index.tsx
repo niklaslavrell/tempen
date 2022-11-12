@@ -45,7 +45,6 @@ const IndexPage: React.FC = () => {
     "last-fetched-location-at"
   );
   const [weatherStatus, setWeatherStatus] = useState<types.WeatherStatus>();
-
   const siteMetadata = useSiteMetadata();
 
   const onPermissionStatusChange = (event: Event) => {
@@ -96,10 +95,6 @@ const IndexPage: React.FC = () => {
     } else {
       setWeatherStatus({ status: types.FetchState.failed });
     }
-  };
-
-  const onClickFetchLocation = () => {
-    fetchLocation();
   };
 
   useEffect(() => {
@@ -206,6 +201,7 @@ const IndexPage: React.FC = () => {
                 locationPermissionState === "prompt")) && (
               <AnimateFade key="location-button">
                 <Button
+                  onClick={fetchLocation}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   animate={{
@@ -218,7 +214,6 @@ const IndexPage: React.FC = () => {
                       delay: 3,
                     },
                   }}
-                  onClick={() => onClickFetchLocation()}
                 >
                   Hämta min plats
                 </Button>
