@@ -146,46 +146,18 @@ const IndexPage: React.FC = () => {
         </GridItem>
 
         <GridItem>
-          {!location && locationPermissionState !== "denied" && (
-            <AnimateFade>
-              <BoldText>
-                Ange din plats för att visa temperaturskillnader
-              </BoldText>
-            </AnimateFade>
-          )}
-
-          {(location?.status === types.FetchState.failed ||
-            locationPermissionState === "denied") && (
-            <AnimateFade>
-              <LightText>Kunde inte hämta koordinater</LightText>
-            </AnimateFade>
-          )}
-
-          {location?.status === types.FetchState.loading && (
-            <AnimateFade>
-              <LightText>Hämtar koordinater</LightText>
-            </AnimateFade>
-          )}
-
-          {weatherStatus?.status === types.FetchState.loading && (
-            <AnimateFade>
-              <LightText>Hämtar väder</LightText>
-            </AnimateFade>
-          )}
-
-          {weatherStatus?.status === types.FetchState.succeeded && (
-            <AnimateFade>
+          {weatherStatus?.status === types.FetchState.succeeded ? (
+            <AnimateFade key="temp">
               <TemperatureWrapper>
-                {weatherStatus.data.difference > 0 && (
+                {weatherStatus.data.difference > 0 ? (
                   <AnimateY direction="up">
                     <Arrows.Warmer />
                   </AnimateY>
-                )}
-                {weatherStatus.data.difference < 0 && (
+                ) : weatherStatus.data.difference < 0 ? (
                   <AnimateY direction="down">
                     <Arrows.Colder />
                   </AnimateY>
-                )}
+                ) : null}
                 <TemperatureText large>
                   {weatherStatus.data.difference >= 0
                     ? weatherStatus.data.difference
@@ -194,36 +166,31 @@ const IndexPage: React.FC = () => {
                 <TemperatureText>°C</TemperatureText>
               </TemperatureWrapper>
             </AnimateFade>
-          )}
+          ) : weatherStatus?.status === types.FetchState.loading ? (
+            <AnimateFade key="wheather-load">
+              <LightText>Hämtar väder</LightText>
+            </AnimateFade>
+          ) : location?.status === types.FetchState.loading ? (
+            <AnimateFade key="location-load">
+              <LightText>Hämtar koordinater</LightText>
+            </AnimateFade>
+          ) : location?.status === types.FetchState.failed ||
+            locationPermissionState === "denied" ? (
+            <AnimateFade key="location-fail">
+              <LightText>Kunde inte hämta koordinater</LightText>
+            </AnimateFade>
+          ) : !location ? (
+            <AnimateFade key="location-prompt">
+              <BoldText>
+                Ange din plats för att visa temperaturskillnader
+              </BoldText>
+            </AnimateFade>
+          ) : null}
         </GridItem>
 
         <GridItem>
-          {((!location && locationPermissionState !== "denied") ||
-            (location?.status !== types.FetchState.loading &&
-              locationPermissionState === "prompt")) && (
-            <AnimateFade>
-              <Button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                animate={{
-                  rotate: [0, 5, -5, 5, -5, 0],
-                  transition: {
-                    type: "spring",
-                    duration: 0.6,
-                    repeat: Infinity,
-                    repeatDelay: 5,
-                    delay: 3,
-                  },
-                }}
-                onClick={() => onClickFetchLocation()}
-              >
-                Hämta min plats
-              </Button>
-            </AnimateFade>
-          )}
-
-          {weatherStatus?.status === types.FetchState.succeeded && (
-            <AnimateFade>
+          {weatherStatus?.status === types.FetchState.succeeded ? (
+            <AnimateFade key="wheather-now">
               <LightText>Där du är just nu</LightText>
               <RegularText
                 css={css`
@@ -233,8 +200,33 @@ const IndexPage: React.FC = () => {
                 0
               )} °C`}</RegularText>
             </AnimateFade>
+          ) : (
+            ((!location && locationPermissionState !== "denied") ||
+              (location?.status !== types.FetchState.loading &&
+                locationPermissionState === "prompt")) && (
+              <AnimateFade key="location-button">
+                <Button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  animate={{
+                    rotate: [0, 5, -5, 5, -5, 0],
+                    transition: {
+                      type: "spring",
+                      duration: 0.6,
+                      repeat: Infinity,
+                      repeatDelay: 5,
+                      delay: 3,
+                    },
+                  }}
+                  onClick={() => onClickFetchLocation()}
+                >
+                  Hämta min plats
+                </Button>
+              </AnimateFade>
+            )
           )}
         </GridItem>
+
         <GridItem>
           {weatherStatus?.status === types.FetchState.succeeded && (
             <AnimateFade>
