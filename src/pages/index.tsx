@@ -111,13 +111,13 @@ const IndexPage: React.FC = () => {
         location.geolocationCoordinates.longitude,
     ],
     async () => {
-      if (location?.status === types.FetchState.succeeded) {
-        const weatherData = await smhi.fetchData(
-          location.geolocationCoordinates.latitude,
-          location.geolocationCoordinates.longitude
-        );
-        return weatherData;
-      }
+      if (location?.status !== types.FetchState.succeeded)
+        throw new Error("No location");
+      const weatherData = await smhi.fetchData(
+        location.geolocationCoordinates.latitude,
+        location.geolocationCoordinates.longitude
+      );
+      return weatherData;
     },
     { enabled: location?.status === types.FetchState.succeeded }
   );
@@ -160,24 +160,24 @@ const IndexPage: React.FC = () => {
                 <TemperatureText>°C</TemperatureText>
               </TemperatureWrapper>
             </AnimateFade>
-          ) : weatherQuery.isLoading ? (
-            <AnimateFade key="wheather-load">
-              <LightText>Hämtar väder</LightText>
-            </AnimateFade>
-          ) : location?.status === types.FetchState.loading ? (
-            <AnimateFade key="location-load">
-              <LightText>Hämtar koordinater</LightText>
-            </AnimateFade>
           ) : location?.status === types.FetchState.failed ||
             locationPermissionState === "denied" ? (
             <AnimateFade key="location-fail">
               <LightText>Kunde inte hämta koordinater</LightText>
+            </AnimateFade>
+          ) : location?.status === types.FetchState.loading ? (
+            <AnimateFade key="location-load">
+              <LightText>Hämtar koordinater</LightText>
             </AnimateFade>
           ) : !location ? (
             <AnimateFade key="location-prompt">
               <BoldText>
                 Ange din plats för att visa temperaturskillnader
               </BoldText>
+            </AnimateFade>
+          ) : weatherQuery.isLoading ? (
+            <AnimateFade key="wheather-load">
+              <LightText>Hämtar väder</LightText>
             </AnimateFade>
           ) : null}
         </GridItem>
