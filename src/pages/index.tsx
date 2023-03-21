@@ -164,6 +164,24 @@ const IndexPage: React.FC = () => {
             locationPermissionState === "denied" ? (
             <AnimateFade key="location-fail">
               <LightText>Kunde inte hämta koordinater</LightText>
+              {locationPermissionState === "denied" ? (
+                <LightText>{`(åtkomst nekad)`}</LightText>
+              ) : location?.status === types.FetchState.failed ? (
+                <LightText>
+                  {`(${
+                    location.geolocationPositionError.code ===
+                    location.geolocationPositionError.PERMISSION_DENIED
+                      ? "åtkomst nekad"
+                      : location.geolocationPositionError.code ===
+                        location.geolocationPositionError.POSITION_UNAVAILABLE
+                      ? "position inte tillgänglig"
+                      : location.geolocationPositionError.code ===
+                        location.geolocationPositionError.TIMEOUT
+                      ? "timeout"
+                      : "okänt fel"
+                  })`}
+                </LightText>
+              ) : null}
             </AnimateFade>
           ) : location?.status === types.FetchState.loading ? (
             <AnimateFade key="location-load">
