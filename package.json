@@ -17,6 +17,8 @@
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
+    "format": "prettier -v && prettier --write './*.{ts,tsx,md}' 'src/**/*.{ts,tsx,md}'",
+    "format:check": "prettier -v && prettier --check './*.{ts,tsx,md}' 'src/**/*.{ts,tsx,md}'",
     "tyypecheck": "tsc --noEmit"
   },
   "dependencies": {
