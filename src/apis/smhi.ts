@@ -1,10 +1,20 @@
 import * as types from "../types";
 
-type Parameter = {
-  level: number;
-  levelType: string;
-  name: string;
-  unit: string;
+type Parameter = AirPressure | AirTemperature;
+
+type AirPressure = {
+  name: "msl";
+  unit: "hPa";
+  levelType: "hmsl";
+  level: 0;
+  values: number[];
+};
+
+type AirTemperature = {
+  name: "t";
+  unit: "C";
+  levelType: "	hl";
+  level: 2;
   values: number[];
 };
 
@@ -41,6 +51,17 @@ const getMesanUrl = (latitude: number, longitude: number): URL => {
 
 const parseCoordinate = (coordinate: number): number => {
   return Number(coordinate.toFixed(4));
+};
+
+const getAirTemperatureParameter = (
+  timeSerie: TimeSerie
+): AirTemperature | undefined => {
+  for (const parameter of timeSerie.parameters) {
+    if (parameter.name === "t") {
+      return parameter;
+    }
+  }
+  return undefined;
 };
 
 /**
@@ -95,9 +116,8 @@ export const fetchData = async (
   const todayTimeSerie = forecast.timeSeries.at(0);
   if (!todayTimeSerie) return undefined;
 
-  const todayTemperature = todayTimeSerie?.parameters
-    .find((parameter) => parameter.name === "t")
-    ?.values.at(0);
+  const todayTemperature =
+    getAirTemperatureParameter(todayTimeSerie)?.values.at(0);
   if (!todayTemperature) return undefined;
 
   const yesterdayTimeSerie = analysis.timeSeries.find(
@@ -107,9 +127,8 @@ export const fetchData = async (
   );
   if (!yesterdayTimeSerie) return undefined;
 
-  const yesterdayTemperature = yesterdayTimeSerie?.parameters
-    .find((parameter) => parameter.name === "t")
-    ?.values.at(0);
+  const yesterdayTemperature =
+    getAirTemperatureParameter(yesterdayTimeSerie)?.values.at(0);
   if (!yesterdayTemperature) return undefined;
 
   const weatherData: types.WeatherData = {
