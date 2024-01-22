@@ -45,7 +45,7 @@ const MESAN_BASE_URL = `https://opendata-download-metanalys.smhi.se` as const;
 
 const getMesanUrl = (latitude: number, longitude: number): URL => {
   const url = new URL(MESAN_BASE_URL);
-  url.pathname = `/api/category/mesan1g/version/2/geotype/point/lon/${longitude}/lat/${latitude}/data.json`;
+  url.pathname = `/api/category/mesan2g/version/1/geotype/point/lon/${longitude}/lat/${latitude}/data.json`;
   return url;
 };
 
