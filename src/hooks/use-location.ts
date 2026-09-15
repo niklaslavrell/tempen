@@ -51,10 +51,14 @@ export const useLocation = () => {
   }, [checkPermission]);
 
   useEffect(() => {
-    if (utils.hasPermissionsApi && locationPermissionState === "granted") {
+    if (
+      utils.hasPermissionsApi &&
+      locationPermissionState === "granted" &&
+      !location
+    ) {
       fetchLocation();
     }
-  }, [locationPermissionState, fetchLocation]);
+  }, [location, locationPermissionState, fetchLocation]);
 
   useEffect(() => {
     if (!utils.hasPermissionsApi && !location) {
