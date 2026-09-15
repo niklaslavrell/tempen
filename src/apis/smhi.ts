@@ -1,30 +1,16 @@
 import * as types from "../types";
 
-type Parameter = AirPressure | AirTemperature;
-
-type AirPressure = {
-  name: "msl";
-  unit: "hPa";
-  levelType: "hmsl";
-  level: 0;
-  values: number[];
-};
-
-type AirTemperature = {
-  name: "t";
-  unit: "C";
-  levelType: "	hl";
-  level: 2;
-  values: number[];
+type ParameterData = {
+  air_temperature?: number;
 };
 
 type TimeSerie = {
-  parameters: Parameter[];
-  validTime: string;
+  time: string;
+  data: ParameterData;
 };
 
 type SmhiResponse = {
-  approvedTime: string;
+  createdTime: string;
   referenceTime: string;
   geometry: {
     coordinates: [longitude: number, latitude: number];
@@ -37,7 +23,7 @@ const FORECAST_BASE_URL = `https://opendata-download-metfcst.smhi.se` as const;
 
 const getForecastUrl = (latitude: number, longitude: number): URL => {
   const url = new URL(FORECAST_BASE_URL);
-  url.pathname = `/api/category/pmp3g/version/2/geotype/point/lon/${longitude}/lat/${latitude}/data.json`;
+  url.pathname = `/api/category/snow1g/version/1/geotype/point/lon/${longitude}/lat/${latitude}/data.json`;
   return url;
 };
 
@@ -45,7 +31,7 @@ const MESAN_BASE_URL = `https://opendata-download-metanalys.smhi.se` as const;
 
 const getMesanUrl = (latitude: number, longitude: number): URL => {
   const url = new URL(MESAN_BASE_URL);
-  url.pathname = `/api/category/mesan2g/version/1/geotype/point/lon/${longitude}/lat/${latitude}/data.json`;
+  url.pathname = `/api/category/mesan2g/version/2/geotype/point/lon/${longitude}/lat/${latitude}/data.json`;
   return url;
 };
 
@@ -53,15 +39,16 @@ const parseCoordinate = (coordinate: number): number => {
   return Number(coordinate.toFixed(4));
 };
 
-const getAirTemperatureParameter = (
-  timeSerie: TimeSerie
-): AirTemperature | undefined => {
-  for (const parameter of timeSerie.parameters) {
-    if (parameter.name === "t") {
-      return parameter;
-    }
+const getAirTemperature = (timeSerie: TimeSerie): number | undefined => {
+  return timeSerie.data.air_temperature;
+};
+
+const fetchSmhiData = async (url: URL): Promise<SmhiResponse> => {
+  const response = await window.fetch(url);
+  if (!response.ok) {
+    throw new Error(`SMHI responded ${response.status} for ${url.pathname}`);
   }
-  return undefined;
+  return response.json();
 };
 
 /**
@@ -75,12 +62,7 @@ const fetchForecastData = async (
   const parsedLatitude = parseCoordinate(latitude);
   const parsedLongitude = parseCoordinate(longitude);
 
-  const url = getForecastUrl(parsedLatitude, parsedLongitude);
-
-  const response = await window.fetch(url);
-  const smhiResponse: SmhiResponse = await response.json();
-
-  return smhiResponse;
+  return fetchSmhiData(getForecastUrl(parsedLatitude, parsedLongitude));
 };
 
 /**
@@ -94,12 +76,7 @@ const fetchAnalysisData = async (
   const parsedLatitude = parseCoordinate(latitude);
   const parsedLongitude = parseCoordinate(longitude);
 
-  const url = getMesanUrl(parsedLatitude, parsedLongitude);
-
-  const response = await window.fetch(url);
-  const smhiResponse: SmhiResponse = await response.json();
-
-  return smhiResponse;
+  return fetchSmhiData(getMesanUrl(parsedLatitude, parsedLongitude));
 };
 
 export const fetchData = async (
@@ -116,26 +93,24 @@ export const fetchData = async (
   const todayTimeSerie = forecast.timeSeries.at(0);
   if (!todayTimeSerie) return undefined;
 
-  const todayTemperature =
-    getAirTemperatureParameter(todayTimeSerie)?.values.at(0);
-  if (!todayTemperature) return undefined;
+  const todayTemperature = getAirTemperature(todayTimeSerie);
+  if (todayTemperature === undefined) return undefined;
 
   const yesterdayTimeSerie = analysis.timeSeries.find(
     (timeSerie) =>
-      new Date(timeSerie.validTime).getHours() ===
-      new Date(todayTimeSerie.validTime).getHours()
+      new Date(timeSerie.time).getHours() ===
+      new Date(todayTimeSerie.time).getHours()
   );
   if (!yesterdayTimeSerie) return undefined;
 
-  const yesterdayTemperature =
-    getAirTemperatureParameter(yesterdayTimeSerie)?.values.at(0);
-  if (!yesterdayTemperature) return undefined;
+  const yesterdayTemperature = getAirTemperature(yesterdayTimeSerie);
+  if (yesterdayTemperature === undefined) return undefined;
 
   const weatherData: types.WeatherData = {
     today: { celsius: todayTemperature },
     yesterday: { celsius: yesterdayTemperature },
     difference: Math.round(todayTemperature - yesterdayTemperature),
-    date: new Date(todayTimeSerie.validTime),
+    date: new Date(todayTimeSerie.time),
   };
 
   return weatherData;
