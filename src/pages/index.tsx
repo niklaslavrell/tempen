@@ -137,7 +137,12 @@ const IndexPage: React.FC = () => {
             <AnimateFade key="wheather-load">
               <LightText>Hämtar väder</LightText>
             </AnimateFade>
-          ) : null}
+          ) : (
+            <AnimateFade key="weather-fail">
+              <LightText>Kunde inte hämta väder</LightText>
+              <LightText>{`(SMHI svarar inte)`}</LightText>
+            </AnimateFade>
+          )}
         </GridItem>
 
         <GridItem>
